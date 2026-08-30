@@ -6,33 +6,41 @@ on:
   workflow_dispatch:
 
 permissions:
+  contents: read
   pages: write
-  contents: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-  configure:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Enable legacy Pages from main /docs
+      - uses: actions/checkout@v4
+      - name: Configure Pages (enable if needed)
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Upload /docs
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Also keep legacy /docs source if API allows
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
-          repo="${{ github.repository }}"
-          if gh api "/repos/${repo}/pages" >/tmp/pages.json 2>/dev/null; then
-            echo "Pages already configured:"
-            cat /tmp/pages.json
-            gh api --method PUT "/repos/${repo}/pages" \
-              -f build_type='legacy' \
-              -f source[branch]='main' \
-              -f source[path]='/docs'
-          else
-            gh api --method POST "/repos/${repo}/pages" \
-              -f build_type='legacy' \
-              -f source[branch]='main' \
-              -f source[path]='/docs'
-          fi
-          gh api --method PATCH "/repos/${repo}" \
+          gh api --method PUT "/repos/${{ github.repository }}/pages" \
+            -f build_type='legacy' \
+            -f source[branch]='main' \
+            -f source[path]='/docs' || true
+          gh api --method PATCH "/repos/${{ github.repository }}" \
             -f homepage='https://pavlinovc-svg.github.io/UWSWOK-Resources/' || true
-          echo "Current Pages config:"
-          gh api "/repos/${repo}/pages"
+          gh api "/repos/${{ github.repository }}/pages" || true
