@@ -857,6 +857,14 @@ def build_orgs(merged, order):
         hours = g["hours"]
         short = notes_all[:220].rsplit(" ", 1)[0] + ("…" if len(notes_all) > 220 else "") if notes_all else f"Community resource listed by United Way of Southwest Oklahoma. Categories: {', '.join(sorted(g['cats']))}."
         if hide:
+            notes_all = re.sub(r"(?i)address\s*:.*?(?=(phone|hotline|daytime|\n\n|$))", "", notes_all)
+            notes_all = re.sub(
+                r"\b\d{2,5}\s+(?:[NSEW]{1,2}\s+)?[A-Za-z0-9.'\- ]{2,40}(?:Ave|Avenue|Rd|Road|St|Street|Blvd|Dr|Drive|Ln|Lane)\.?",
+                "",
+                notes_all,
+                flags=re.I,
+            )
+            notes_all = re.sub(r"\s{2,}", " ", notes_all).strip()
             short = "Confidential location — call first. Domestic violence support. Address is not published."
             street = ""
             city = ""

@@ -11,13 +11,24 @@ export function Home() {
 
   const visible = useMemo(() => {
     const t = q.trim().toLowerCase();
+    const norm = (s: string) => s.toLowerCase().replace(/[’'–—-]/g, " ").replace(/\s+/g, " ");
+    const qn = norm(t);
     return orgs.filter((o) => {
       if (chip && !o.categories.includes(chip)) return false;
       if (!t) return true;
-      const blob = [o.name, o.shortDescription, o.phone, o.categories.join(" "), o.keywords.join(" "), o.services.join(" ")]
-        .join(" ")
-        .toLowerCase();
-      return blob.includes(t);
+      const blob = norm(
+        [
+          o.name,
+          o.shortDescription,
+          o.description,
+          o.phone,
+          o.categories.join(" "),
+          o.keywords.join(" "),
+          o.services.join(" "),
+          o.situations.join(" "),
+        ].join(" ")
+      );
+      return blob.includes(t) || blob.includes(qn);
     });
   }, [orgs, q, chip]);
 

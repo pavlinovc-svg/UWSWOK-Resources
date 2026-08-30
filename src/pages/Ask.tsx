@@ -64,7 +64,14 @@ export function Ask() {
           </div>
         ))}
       </div>
-      <form className="row" style={{ marginTop: "1rem" }} onSubmit={send}>
+      <form
+        className="row"
+        style={{ marginTop: "1rem" }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          send();
+        }}
+      >
         <input
           className="search"
           style={{ marginTop: 0 }}
