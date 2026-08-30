@@ -39,3 +39,5 @@ npm run dev
 Vite `base` is `/UWSWOK-Resources/`. `npm run build` writes the static site to `/docs` (`index.html`, `404.html` SPA fallback, assets, `organizations.json`, `.nojekyll`).
 
 Pages: legacy / branch `main` / folder `/docs`.
+
+If `github.io` still 404s, a repo admin must turn Pages on once: **Settings → Pages → Deploy from a branch → `main` → `/docs`**. Git and `/docs` are already published; this token cannot create the Pages site via the API.
