@@ -1,0 +1,38 @@
+name: Enable GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  pages: write
+  contents: write
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable legacy Pages from main /docs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          repo="${{ github.repository }}"
+          if gh api "/repos/${repo}/pages" >/tmp/pages.json 2>/dev/null; then
+            echo "Pages already configured:"
+            cat /tmp/pages.json
+            gh api --method PUT "/repos/${repo}/pages" \
+              -f build_type='legacy' \
+              -f source[branch]='main' \
+              -f source[path]='/docs'
+          else
+            gh api --method POST "/repos/${repo}/pages" \
+              -f build_type='legacy' \
+              -f source[branch]='main' \
+              -f source[path]='/docs'
+          fi
+          gh api --method PATCH "/repos/${repo}" \
+            -f homepage='https://pavlinovc-svg.github.io/UWSWOK-Resources/' || true
+          echo "Current Pages config:"
+          gh api "/repos/${repo}/pages"
